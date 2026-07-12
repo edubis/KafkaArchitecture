@@ -23,11 +23,14 @@ public class PedidoController {
 
     @PostMapping
     public ResponseEntity<Object> registrarPedido(@RequestBody NovoPedidoDTO dto){
-
+        try {
             var pedido = mapper.map(dto);
             var novoPedido = service.salvarPedido(pedido);
             return ResponseEntity.ok(novoPedido.getCodigo());
-
+        }catch (ValidationException e){
+            var erro = new ErroResposta("Erro Validação", e.getField(), e.getMessage());
+            return ResponseEntity.badRequest().body(erro);
+        }
     }
 
     @GetMapping("{pedido}")

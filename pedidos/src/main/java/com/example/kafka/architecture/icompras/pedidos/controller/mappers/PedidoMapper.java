@@ -29,7 +29,7 @@ public interface PedidoMapper {
 
     @AfterMapping
     default void afterMapping(@MappingTarget Pedido pedido) {
-        pedido.setStatus(Status.REALIOZADO);
+        pedido.setStatus(Status.REALIZADO);
         pedido.setDataPedido(LocalDateTime.now());
 
         var total = getAbs(pedido);
