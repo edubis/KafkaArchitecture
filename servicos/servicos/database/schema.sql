@@ -26,7 +26,7 @@ create table pedido
     data_pedido     timestamp      not null default now(),
     chave_pagamento text,
     observacoes     text,
-    status          varchar(20) check ( status in ('REALIOZADO', 'PAGO', 'FATURADO', 'ENVIADO', 'ERRO_PAGAMENTO',
+    status          varchar(20) check ( status in ('REALIZADO', 'PAGO', 'FATURADO', 'ENVIADO', 'ERRO_PAGAMENTO',
                                                    'PREPARANDO_ENVIO')),
     total           decimal(16, 2) not null,
     codigo_rastreio varchar(255),
