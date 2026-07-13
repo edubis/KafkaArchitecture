@@ -1,6 +1,7 @@
 package com.example.kafka.architecture.icompras.pedidos.controller;
 
 
+import com.example.kafka.architecture.icompras.pedidos.controller.dto.NovoPagamentoDTO;
 import com.example.kafka.architecture.icompras.pedidos.controller.dto.NovoPedidoDTO;
 import com.example.kafka.architecture.icompras.pedidos.controller.mappers.PedidoMapper;
 import com.example.kafka.architecture.icompras.pedidos.exceptions.ValidationException;
@@ -40,6 +41,16 @@ public class PedidoController {
                 .orElseGet(()->ResponseEntity
                         .notFound()
                         .build());
+    }
+
+
+    @PostMapping("pagamentos")
+    public ResponseEntity<Object> adicionarNovoPagamento(
+            @RequestBody NovoPagamentoDTO dto
+    ){
+        service.adicionarNovoPagamento(dto.codigoPedido(), dto.dados(),dto.tipoPagamento());
+        return ResponseEntity.noContent().build();
+
     }
 
 

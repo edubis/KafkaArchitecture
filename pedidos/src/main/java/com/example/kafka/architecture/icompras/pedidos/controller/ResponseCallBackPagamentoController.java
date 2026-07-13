@@ -32,8 +32,8 @@ public class ResponseCallBackPagamentoController {
         var decodedValue = myDecode.myDecode64(apiKey);
 
         if(!appKey.getApi().equals(decodedValue)){
-            var response = new ErroResposta("Autenticação incorreta", "Chave de Autenticação Incorreta","Chave incorreta");
-           return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+
+           return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Não foi possível realizar autenticação!");
         }
 
         pedidoService.atualizarStatusPagamento(
