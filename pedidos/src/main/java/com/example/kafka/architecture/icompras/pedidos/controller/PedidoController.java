@@ -7,6 +7,7 @@ import com.example.kafka.architecture.icompras.pedidos.controller.mappers.Pedido
 import com.example.kafka.architecture.icompras.pedidos.exceptions.ValidationException;
 import com.example.kafka.architecture.icompras.pedidos.model.ErroResposta;
 import com.example.kafka.architecture.icompras.pedidos.model.Pedido;
+import com.example.kafka.architecture.icompras.pedidos.model.enums.exception.ItemNaoEncontradoException;
 import com.example.kafka.architecture.icompras.pedidos.service.PedidoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -48,9 +49,13 @@ public class PedidoController {
     public ResponseEntity<Object> adicionarNovoPagamento(
             @RequestBody NovoPagamentoDTO dto
     ){
-        service.adicionarNovoPagamento(dto.codigoPedido(), dto.dados(),dto.tipoPagamento());
-        return ResponseEntity.noContent().build();
-
+        try {
+            service.adicionarNovoPagamento(dto.codigoPedido(), dto.dados(), dto.tipoPagamento());
+            return ResponseEntity.noContent().build();
+        } catch (ItemNaoEncontradoException e) {
+            var erroPagamentos = new ErroResposta("Item não encontrado", "codigoPedido", e.getMessage());
+            return ResponseEntity.badRequest().body(erroPagamentos);
+        }
     }
 
 

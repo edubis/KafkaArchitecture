@@ -5,6 +5,7 @@ import com.example.kafka.architecture.icompras.pedidos.model.DadosPagamento;
 import com.example.kafka.architecture.icompras.pedidos.model.Pedido;
 import com.example.kafka.architecture.icompras.pedidos.model.enums.Status;
 import com.example.kafka.architecture.icompras.pedidos.model.enums.TipoPagamento;
+import com.example.kafka.architecture.icompras.pedidos.model.enums.exception.ItemNaoEncontradoException;
 import com.example.kafka.architecture.icompras.pedidos.repository.ItemPedidoRepository;
 import com.example.kafka.architecture.icompras.pedidos.repository.PedidoRepository;
 import com.example.kafka.architecture.icompras.pedidos.validator.PedidoValidator;
@@ -76,7 +77,7 @@ public class PedidoService {
         var pedidoEncontrado = repository.findById(codigoPedido);
 
         if(pedidoEncontrado.isEmpty()){
-            return;
+           throw new ItemNaoEncontradoException("Pedido não encontrado!");
         }
 
         var pedido = pedidoEncontrado.get();
