@@ -66,7 +66,7 @@ public class PedidoService {
 
         if(sucesso){
             prepararEPublicarPedidoPago(observacoes, pedido);
-            pagamentoPublisher.publicar(pedido);
+
         }else{
             pedido.setStatus(Status.ERRO_PAGAMENTO);
             pedido.setObservacoes(observacoes);
@@ -81,6 +81,7 @@ public class PedidoService {
         pedido.setObservacoes(observacoes);
         carregarDadosCliente(pedido);
         carregarItensPedido(pedido);
+        pagamentoPublisher.publicar(pedido);
     }
 
     @Transactional
