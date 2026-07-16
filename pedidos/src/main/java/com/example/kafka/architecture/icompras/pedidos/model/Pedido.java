@@ -1,5 +1,6 @@
 package com.example.kafka.architecture.icompras.pedidos.model;
 
+import com.example.kafka.architecture.icompras.pedidos.client.representation.ClienteRepresentation;
 import com.example.kafka.architecture.icompras.pedidos.controller.dto.DadosPagamentoDTO;
 import com.example.kafka.architecture.icompras.pedidos.model.enums.Status;
 import jakarta.persistence.*;
@@ -54,6 +55,9 @@ public class Pedido {
 
     )
     private List<ItemPedido> itens;
+
+    @Transient
+    private ClienteRepresentation dadosCliente;
 
     @Transient
     private DadosPagamento dadosPagamento;

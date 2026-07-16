@@ -10,7 +10,7 @@ services:
       - "22181:2181"
 
   kafka:
-    image: confluentinc/cp-kafka
+    image: confluentinc/cp-kafka:7.2.15
     depends_on:
       - zookeeper
     environment:
@@ -33,4 +33,3 @@ services:
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
     ports:
       - "8090:8080"
-

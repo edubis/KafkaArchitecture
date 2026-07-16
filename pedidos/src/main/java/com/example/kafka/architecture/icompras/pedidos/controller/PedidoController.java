@@ -8,6 +8,8 @@ import com.example.kafka.architecture.icompras.pedidos.exceptions.ValidationExce
 import com.example.kafka.architecture.icompras.pedidos.model.ErroResposta;
 import com.example.kafka.architecture.icompras.pedidos.model.Pedido;
 import com.example.kafka.architecture.icompras.pedidos.model.enums.exception.ItemNaoEncontradoException;
+import com.example.kafka.architecture.icompras.pedidos.publisher.DetalhePedidoMapper;
+import com.example.kafka.architecture.icompras.pedidos.publisher.representation.DetalhePedidoRepresentationDTO;
 import com.example.kafka.architecture.icompras.pedidos.service.PedidoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,7 @@ public class PedidoController {
 
     private final PedidoService service;
     private final PedidoMapper mapper;
+    private final DetalhePedidoMapper detalhePedidoMapper;
 
 
     @PostMapping
@@ -35,16 +38,6 @@ public class PedidoController {
         }
     }
 
-    @GetMapping("{pedido}")
-    public ResponseEntity<Pedido> buscarPedido(@PathVariable("pedido") Long pedido){
-        return service.obterPedido(pedido)
-                .map(ResponseEntity::ok)
-                .orElseGet(()->ResponseEntity
-                        .notFound()
-                        .build());
-    }
-
-
     @PostMapping("pagamentos")
     public ResponseEntity<Object> adicionarNovoPagamento(
             @RequestBody NovoPagamentoDTO dto
@@ -56,6 +49,17 @@ public class PedidoController {
             var erroPagamentos = new ErroResposta("Item não encontrado", "codigoPedido", e.getMessage());
             return ResponseEntity.badRequest().body(erroPagamentos);
         }
+    }
+
+    @GetMapping("{codigo}")
+    public ResponseEntity<DetalhePedidoRepresentationDTO> obterDetalhesPedido(
+            @PathVariable("codigo") Long codigo){
+
+        return service.carregarDadosCompletosPedido(codigo)
+                .map(detalhePedidoMapper::map)
+                .map(ResponseEntity::ok)
+                .orElseGet(()-> ResponseEntity.notFound()
+                        .build());
     }
 
 

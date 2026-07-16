@@ -1,11 +1,15 @@
 package com.example.kafka.architecture.icompras.pedidos.service;
 
+import com.example.kafka.architecture.icompras.pedidos.client.ClientesCLient;
+import com.example.kafka.architecture.icompras.pedidos.client.ProdutosClient;
 import com.example.kafka.architecture.icompras.pedidos.client.ServicoBancarioClient;
 import com.example.kafka.architecture.icompras.pedidos.model.DadosPagamento;
+import com.example.kafka.architecture.icompras.pedidos.model.ItemPedido;
 import com.example.kafka.architecture.icompras.pedidos.model.Pedido;
 import com.example.kafka.architecture.icompras.pedidos.model.enums.Status;
 import com.example.kafka.architecture.icompras.pedidos.model.enums.TipoPagamento;
 import com.example.kafka.architecture.icompras.pedidos.model.enums.exception.ItemNaoEncontradoException;
+import com.example.kafka.architecture.icompras.pedidos.publisher.PagamentoPublisher;
 import com.example.kafka.architecture.icompras.pedidos.repository.ItemPedidoRepository;
 import com.example.kafka.architecture.icompras.pedidos.repository.PedidoRepository;
 import com.example.kafka.architecture.icompras.pedidos.validator.PedidoValidator;
@@ -25,6 +29,9 @@ public class PedidoService {
     private final ItemPedidoRepository itemPedidoRepository;
     private final PedidoValidator validator;
     private final ServicoBancarioClient servicoBancarioClient;
+    private final ClientesCLient clientesCLient;
+    private final ProdutosClient produtosClient;
+    private final PagamentoPublisher pagamentoPublisher;
 
 
     @Transactional
@@ -34,6 +41,7 @@ public class PedidoService {
         itemPedidoRepository.saveAll(pedido.getItens());
         pedido.setChavePagamento(servicoBancarioClient.solicitarPagamento(pedido));
         return pedido;
+
     }
 
     public Optional<Pedido> obterPedido(Long pedido) {
@@ -57,8 +65,8 @@ public class PedidoService {
         Pedido pedido = pedidoEncontrado.get();
 
         if(sucesso){
-            pedido.setStatus(Status.PAGO);
-            pedido.setObservacoes(observacoes);
+            prepararEPublicarPedidoPago(observacoes, pedido);
+            pagamentoPublisher.publicar(pedido);
         }else{
             pedido.setStatus(Status.ERRO_PAGAMENTO);
             pedido.setObservacoes(observacoes);
@@ -66,6 +74,13 @@ public class PedidoService {
 
         repository.save(pedido);
 
+    }
+
+    private void prepararEPublicarPedidoPago(String observacoes, Pedido pedido) {
+        pedido.setStatus(Status.PAGO);
+        pedido.setObservacoes(observacoes);
+        carregarDadosCliente(pedido);
+        carregarItensPedido(pedido);
     }
 
     @Transactional
@@ -94,6 +109,27 @@ public class PedidoService {
 
         //redundancia de código para deixar visual que está sendo persistido todos os dados de processamento do método
         repository.save(pedido);
+    }
+
+    public Optional<Pedido> carregarDadosCompletosPedido(Long codigo){
+        Optional<Pedido> pedido = repository.findById(codigo);
+        pedido.ifPresent(this::carregarDadosCliente);
+        pedido.ifPresent(this::carregarItensPedido);
+        return pedido;
+    }
+
+    private void carregarDadosCliente(Pedido pedido){
+        pedido.setDadosCliente(clientesCLient.obterDadosClientes(pedido.getCodigoCliente()).getBody());
+    }
+
+    private void carregarItensPedido(Pedido pedido){
+        pedido.setItens(itemPedidoRepository.findByPedido(pedido));
+        pedido.getItens().forEach(this::carregarDadosProduto);
+    }
+
+
+    private void carregarDadosProduto(ItemPedido item){
+        item.setNome(produtosClient.obterDadosProduto(item.getCodigoProduto()).getBody().nome());
     }
 
 }
